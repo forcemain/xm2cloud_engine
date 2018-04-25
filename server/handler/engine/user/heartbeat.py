@@ -34,7 +34,7 @@ class HeartbeatEngineHandler(BaseEngineHandler):
         if heartbeat is None:
             return
 
-        _last_time = time.time()
+        _timestamp = time.time()
         _name = heartbeat.get_name()
         _version = heartbeat.get_version()
 
@@ -44,7 +44,7 @@ class HeartbeatEngineHandler(BaseEngineHandler):
         ekey = '{0}::{1}::{2}'.format(_name, agent_uuid, EventType.HEARTBEAT)
         pipe = self.backend_handler.pool.pipeline()
         pipe.hmset(ekey, {
-            'last_time': _last_time,
+            'timestamp': _timestamp,
             'name': _name, 'version': _version
         })
         pipe.expire(ekey, settings.HEARTBEAT_EXPIRED_TIME)

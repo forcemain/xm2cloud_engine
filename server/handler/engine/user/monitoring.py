@@ -59,13 +59,14 @@ class MonitoringEngineHandler(BaseEngineHandler):
         event_timestamp = event.get_event_timestamp()
 
         pipe = self.backend_handler.pool.pipeline()
-        key_numer = self.backend_handler.pool.zcard(metric_key)
-        if key_numer > settings.BACKEND_PER_MAX_POINTS:
-            pipe.zrem(metric_key, event_key)
-            pipe.delete(event_key)
+        _max = time.time() - settings.BACKEND_MEMBER_PERIOD
+        pipe.zremrangebyscore(metric_key, 0, _max)
+
+        _cache = 60
         _value = metric.get_value()
         pipe.zadd(metric_key, event_timestamp, event_key)
         pipe.hmset(event_key, {'value': _value})
+        pipe.expire(event_key, settings.BACKEND_MEMBER_PERIOD+_cache)
         pipe.execute()
 
     def handle(self, event):
