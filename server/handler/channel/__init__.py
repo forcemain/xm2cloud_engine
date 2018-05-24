@@ -5,7 +5,7 @@ import os
 
 
 from server import database
-from server.util.logger import Logger
+from server.common.logger import Logger
 from server.handler.cache import CacheHandler
 
 logger = Logger.get_logger(__name__)

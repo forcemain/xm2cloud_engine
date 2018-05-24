@@ -2,7 +2,7 @@
 
 
 from functools import partial
-from server.util.loader import autodiscover_module
+from server.common.loader import autodiscover_module
 
 
 autodiscover_module(__name__, __file__)

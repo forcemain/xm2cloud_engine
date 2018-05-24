@@ -9,9 +9,9 @@ from server import settings
 from threading import Thread
 from functools import partial
 from multiprocessing import Process
-from server.util.logger import Logger
+from server.common.logger import Logger
 from datetime import datetime, timedelta
-from server.util.amqp.status import AMQPStatus
+from server.common.amqp.status import AMQPStatus
 from server.exceptions import GracefulExitException
 from server.handler.channel.rabbitmq import RabbitMQChannelHandler
 

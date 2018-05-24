@@ -7,9 +7,9 @@ import time
 
 from server import settings
 from threading import Thread
-from server.util.enhance import File
 from multiprocessing import Process
-from server.util.logger import Logger
+from server.common.enhance import File
+from server.common.logger import Logger
 # autodiscovery engine handler
 from server.handler.engine import host
 from server.handler.engine import user

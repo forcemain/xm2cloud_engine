@@ -5,7 +5,7 @@ import time
 
 
 from server import settings
-from server.util.logger import Logger
+from server.common.logger import Logger
 from server.models.heartbeat import Heartbeat
 from server.models.event.event_type import EventType
 from server.handler.engine.baseengine import BaseEngineHandler
@@ -18,6 +18,10 @@ class HeartbeatEngineHandler(BaseEngineHandler):
     enable = True
     name = EventType.HEARTBEAT
 
+    def __init__(self):
+        super(HeartbeatEngineHandler, self).__init__()
+        self.backend_handler = self.backend_factory.create_handler('redis')
+
     def get_heartbeat(self, event):
         event_data = self.decrypt_data(event)
         heartbeat = Heartbeat.from_json(event_data)
@@ -29,7 +33,7 @@ class HeartbeatEngineHandler(BaseEngineHandler):
         return
 
     def put_event(self, event):
-        agent_uuid = event.get_agent_uuid()
+        host_uuid = event.get_source_host_id()
         heartbeat = self.get_heartbeat(event)
         if heartbeat is None:
             return
@@ -38,10 +42,10 @@ class HeartbeatEngineHandler(BaseEngineHandler):
         _name = heartbeat.get_name()
         _version = heartbeat.get_version()
 
-        # xm2cloud_agent::f352c284-19f3-44ef-927e-8ad2eabdae94::heartbeat
-        # xm2cloud_engine::f352c284-19f3-44ef-927e-8ad2eabdae94::heartbeat
+        # xm2cloud_agent::heartbeat::f352c284-19f3-44ef-927e-8ad2eabdae94
+        # xm2cloud_engine::heartbeat::f352c284-19f3-44ef-927e-8ad2eabdae94
         #
-        ekey = '{0}::{1}::{2}'.format(_name, agent_uuid, EventType.HEARTBEAT)
+        ekey = '{0}::{1}::{2}'.format(_name, EventType.HEARTBEAT, host_uuid)
         pipe = self.backend_handler.pool.pipeline()
         pipe.hmset(ekey, {
             'timestamp': _timestamp,

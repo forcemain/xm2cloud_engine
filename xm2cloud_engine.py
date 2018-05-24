@@ -4,9 +4,9 @@
 import sys
 
 
-from server.util.logger import Logger
 from server.core.engine import Engine
 from server.core.channel import Channel
+from server.common.logger import Logger
 from server.database import get_agentdir
 from server.core.heatbeat import Heartbeat
 from server.signals.exit import GracefulExitSignal

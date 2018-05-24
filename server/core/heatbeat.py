@@ -7,7 +7,7 @@ import time
 
 from server import settings
 from multiprocessing import Process
-from server.util.logger import Logger
+from server.common.logger import Logger
 from datetime import datetime, timedelta
 from server.exceptions import GracefulExitException
 from server.handler.heartbeat import HeartbeatHandler

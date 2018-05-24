@@ -1,11 +1,9 @@
 #! -*- coding: utf-8 -*-
 
 
-import traceback
-
-from server.util.logger import Logger
-from server.handler.backend._redis import RedisBackendHandler
+from server.common.logger import Logger
 from server.handler.channel.rabbitmq import RabbitMQChannelHandler
+from server.handler.backend.basebackend import BackendHandlerFactory
 
 
 logger = Logger.get_logger(__name__)
@@ -33,9 +31,9 @@ class BaseEngineHandler(object):
     name = None
     enable = True
 
-    def __init__(self, decrypt_factory=None, backend_handler=None,  channel_handler=None):
+    def __init__(self, decrypt_factory=None, backend_factory=None,  channel_handler=None):
         self._decrypt_factory = decrypt_factory
-        self._backend_handler = backend_handler
+        self._backend_factory = backend_factory
         self._channel_handler = channel_handler
 
     @property
@@ -49,12 +47,12 @@ class BaseEngineHandler(object):
         return self._decrypt_factory
 
     @property
-    def backend_handler(self):
-        if isinstance(self._backend_handler, RedisBackendHandler):
-            return self._backend_handler
-        self._backend_handler = RedisBackendHandler()
+    def backend_factory(self):
+        if isinstance(self._backend_factory, BackendHandlerFactory):
+            return self._backend_factory
+        self._backend_factory = BackendHandlerFactory()
 
-        return self._backend_handler
+        return self._backend_factory
 
     @property
     def channel_handler(self):

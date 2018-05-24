@@ -30,6 +30,12 @@ BACKEND_REDIS_MAX_CONNECTIONS = 10
 BACKEND_REDIS_HOST = 'ops.xxoo.com'
 BACKEND_REDIS_PASSWORD = 'z6A1kaff8X4UbsjpwxseMVtWerMxiAok'
 # Backend OpenTsdb Settings
+BACKEND_OPENTSDB_PORT = 4242
+BACKEND_OPENTSDB_PROTOCOL = 'http'
+BACKEND_OPENTSDB_USERNAME = ''
+BACKEND_OPENTSDB_PASSWORD = ''
+BACKEND_OPENTSDB_HOST = 'ops.xxoo.com'
+BACKEND_OPENTSDB_POOL_NUM = cpu_count()
 
 
 # Channel Settings
@@ -59,5 +65,5 @@ SERVER_UUID = 'fdb747d1-505d-475c-828c-7bcb919162c6'
 
 
 # Logging Settings
-DEFAULT_LOG_LEVEL = logging.INFO
+DEFAULT_LOG_LEVEL = logging.DEBUG
 DEFAULT_LOG_FORMAT = '%(asctime)s - %(name)s - %(pathname)s - %(lineno)d - %(levelname)s - %(message)s'

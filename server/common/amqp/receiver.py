@@ -4,29 +4,24 @@
 import time
 
 
-from server.util.logger import Logger
-from server.util.amqp.status import AMQPStatus
+from server.common.logger import Logger
+from server.common.amqp.status import AMQPStatus
 
 
 logger = Logger.get_logger(__name__)
 
 
-class AMQPSender(object):
+class AMQPReceiver(object):
     def __init__(self, **kwargs):
-        self._acked = 0
-        self._nacked = 0
         self._channel = None
-        self._deliveries = []
         self._closing = False
-        self._stopping = False
         self._connection = None
-        self._message_number = 0
+        self._consumer_tag = None
         self._queue = kwargs.get('queue', None)
         self._exchange = kwargs.get('exchange', None)
-        self._routing_key = kwargs.get('routing_key')
         self._count_down = kwargs.get('count_down', 5)
-        self._exchange_type = kwargs.get('exchange_type')
-        self._publish_interval = kwargs.get('publish_interval', 1)
+        self._routing_key = kwargs.get('routing_key', None)
+        self._exchange_type = kwargs.get('exchange_type', None)
 
         # get a millisecond timestamp
         self._disconnect_time = int(time.time())
@@ -72,15 +67,10 @@ class AMQPSender(object):
             self._connection.add_timeout(self._count_down, self.reconnect)
 
     def reconnect(self):
-        self._deliveries = []
-        self._acked = 0
-        self._nacked = 0
-        self._message_number = 0
-
         self._connection.ioloop.stop()
-
-        self._connection = self.connect()
-        self._connection.ioloop.start()
+        if not self._closing:
+            self._connection = self.connect()
+            self._connection.ioloop.start()
 
     def open_channel(self):
         logger.info('Creating a new channel')
@@ -92,17 +82,17 @@ class AMQPSender(object):
         self.add_on_channel_close_callback()
         self.setup_exchange(self._exchange)
 
-        # enable delivery ack and start publish
-        self.start_publishing()
+        # start consuming when channel open
+        self.start_consuming()
 
     def add_on_channel_close_callback(self):
         logger.info('Adding channel close callback')
         self._channel.add_on_close_callback(self.on_channel_closed)
 
     def on_channel_closed(self, channel, reply_code, reply_text):
-        logger.warning('Channel was closed: (%s) %s', reply_code, reply_text)
-        if not self._closing:
-            self._connection.close()
+        logger.warning('Channel %i was closed: (%s) %s',
+                       channel, reply_code, reply_text)
+        self._connection.close()
 
     def setup_exchange(self, exchange_name):
         logger.info('Declaring exchange %s', exchange_name)
@@ -126,52 +116,43 @@ class AMQPSender(object):
 
     def on_bindok(self, unused_frame):
         logger.info('Queue bound')
-        self.start_publishing()
+        self.start_consuming()
 
-    def start_publishing(self):
+    def start_consuming(self):
         logger.info('Issuing consumer related RPC commands')
-        self.enable_delivery_confirmations()
-        self.schedule_next_message()
+        self.add_on_cancel_callback()
+        self._consumer_tag = self._channel.basic_consume(self.on_message,
+                                                         self._queue)
 
-    def enable_delivery_confirmations(self):
-        logger.info('Issuing Confirm.Select RPC command')
-        self._channel.confirm_delivery(self.on_delivery_confirmation)
+    def add_on_cancel_callback(self):
+        logger.info('Adding consumer cancellation callback')
+        self._channel.add_on_cancel_callback(self.on_consumer_cancelled)
 
-    def on_delivery_confirmation(self, method_frame):
-        confirmed = False
+    def on_consumer_cancelled(self, method_frame):
+        logger.info('Consumer was cancelled remotely, shutting down: %r',
+                    method_frame)
+        if self._channel:
+            self._channel.close()
 
-        confirmation_type = method_frame.method.NAME.split('.')[1].lower()
-        logger.info('Received %s for delivery tag: %i',
-                    confirmation_type,
-                    method_frame.method.delivery_tag)
-        if confirmation_type == 'ack':
-            self._acked += 1
-            confirmed = True
-        elif confirmation_type == 'nack':
-            self._nacked += 1
-        self._deliveries.remove(method_frame.method.delivery_tag)
-        logger.info('Published %i messages, %i have yet to be confirmed, '
-                    '%i were acked and %i were nacked',
-                    self._message_number, len(self._deliveries),
-                    self._acked, self._nacked)
-
-        return confirmed
-
-    def schedule_next_message(self):
-        if self._stopping:
-            return
-        logger.info('Scheduling next message for %0.1f seconds',
-                    self._publish_interval)
-        self._connection.add_timeout(self._publish_interval,
-                                     self.publish_message)
-
-    def publish_message(self):
+    def on_message(self, unused_channel, basic_deliver, properties, body):
         raise NotImplementedError
+
+    def acknowledge_message(self, delivery_tag):
+        logger.info('Acknowledging message %s', delivery_tag)
+        self._channel.basic_ack(delivery_tag)
+
+    def stop_consuming(self):
+        if self._channel:
+            logger.info('Sending a Basic.Cancel RPC command to RabbitMQ')
+            self._channel.basic_cancel(self.on_cancelok, self._consumer_tag)
+
+    def on_cancelok(self, unused_frame):
+        logger.info('RabbitMQ acknowledged the cancellation of the consumer')
+        self.close_channel()
 
     def close_channel(self):
         logger.info('Closing the channel')
-        if self._channel:
-            self._channel.close()
+        self._channel.close()
 
     def run(self):
         self._connection = self.connect()
@@ -179,13 +160,11 @@ class AMQPSender(object):
 
     def stop(self):
         logger.info('Stopping')
-        self._stopping = True
-        self.close_channel()
-        self.close_connection()
+        self._closing = True
+        self.stop_consuming()
         self._connection.ioloop.stop()
         logger.info('Stopped')
 
     def close_connection(self):
         logger.info('Closing connection')
-        self._closing = True
         self._connection.close()

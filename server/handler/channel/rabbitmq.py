@@ -6,9 +6,9 @@ import time
 
 
 from server import settings
-from server.util.logger import Logger
-from server.util.amqp.sender import AMQPSender
-from server.util.amqp.receiver import AMQPReceiver
+from server.common.logger import Logger
+from server.common.amqp.sender import AMQPSender
+from server.common.amqp.receiver import AMQPReceiver
 from server.handler.channel import BaseChannelHelper, BaseChannelHandler
 
 

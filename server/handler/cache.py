@@ -7,8 +7,8 @@ import shutil
 import itertools
 
 
-from server.util.logger import Logger
-from server.util.enhance import File, Random
+from server.common.logger import Logger
+from server.common.enhance import File, Random
 
 
 logger = Logger.get_logger(__name__)

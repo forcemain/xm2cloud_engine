@@ -1,7 +1,7 @@
 #! -*- coding: utf-8 -*-
 
 
-from server.util.tree import Node
+from server.common.tree import Node
 
 
 class Q(Node):
