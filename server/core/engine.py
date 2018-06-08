@@ -38,14 +38,7 @@ class EventThread(Thread):
             _event_threads.remove(self)
         self._obj.channel_handler.ccache_handler.remove(self._fname)
 
-    def before_run(self):
-        source_file = self._obj.channel_handler.rcache_handler.abspath(self._fname)
-        target_file = self._obj.channel_handler.ccache_handler.abspath(self._fname)
-
-        File.force_move(source_file, target_file)
-
     def run(self):
-        self.before_run()
         try:
             event = PubEvent.from_json(self._fcontent)
             self._obj.event_dispatch(event)
@@ -85,6 +78,12 @@ class Engine(Process):
         next_time_str = next_time.strftime('%Y-%m-%d %H:%M:%S')
 
         return next_time_str
+
+    def put_ccache(self, fname):
+        source_file = self.channel_handler.rcache_handler.abspath(fname)
+        target_file = self.channel_handler.ccache_handler.abspath(fname)
+
+        File.force_move(source_file, target_file)
 
     def run_destructor(self):
         self.channel_handler.ccache_handler.clear()
@@ -131,12 +130,12 @@ class Engine(Process):
                     time.sleep(settings.ENGINE_SCHEDULER_INTERVAL)
                     continue
                 for event_data in events_data:
+                    fname, _ = event_data
+                    self.put_ccache(fname)
                     t = EventThread(event_data, self)
                     t.setDaemon(True)
                     t.start()
                     _event_threads.append(t)
-                for t in _event_threads:
-                    t.join()
                 logger.info('Events ready, next scheduled at %s', self.next_scheduled)
                 time.sleep(settings.ENGINE_SCHEDULER_INTERVAL)
             print 'Engine process({0}) exit.'.format(os.getpid())
