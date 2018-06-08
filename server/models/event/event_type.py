@@ -6,4 +6,5 @@ class EventType(object):
     HEARTBEAT = 'heartbeat'
     MONITORING = 'monitoring'
     EXECUTESCRIPT = 'execscript'
+    RESPONSE_EXECUTESCRIPT = 'response_execscript'
 
