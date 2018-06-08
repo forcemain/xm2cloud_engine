@@ -20,7 +20,7 @@ from server.handler.engine.baseengine import EngineHandlerFactory
 from server.handler.channel.rabbitmq import RabbitMQChannelHandler
 
 
-_evnet_threads = []
+_event_threads = []
 
 
 logger = Logger.get_logger(__name__)
@@ -34,8 +34,8 @@ class EventThread(Thread):
         self._fname, self._fcontent = event_data
 
     def after_run(self):
-        if self in _evnet_threads:
-            _evnet_threads.remove(self)
+        if self in _event_threads:
+            _event_threads.remove(self)
         self._obj.channel_handler.ccache_handler.remove(self._fname)
 
     def before_run(self):
@@ -124,7 +124,7 @@ class Engine(Process):
                 if len(events_data) == 0:
                     need_wait = True
                     logger.info('No events ready, next scheduled at %s', self.next_scheduled)
-                if len(_evnet_threads) > settings.ENGINE_MAX_THREADPOOL_SIZE:
+                if len(_event_threads) > settings.ENGINE_MAX_THREADPOOL_SIZE:
                     need_wait = True
                     logger.info('To many threads, next scheduled at %s', self.next_scheduled)
                 if need_wait is True:
@@ -134,8 +134,9 @@ class Engine(Process):
                     t = EventThread(event_data, self)
                     t.setDaemon(True)
                     t.start()
-                    _evnet_threads.append(t)
-                    # may be an  time-consuming task, so not join
+                    _event_threads.append(t)
+                for t in _event_threads:
+                    t.join()
                 logger.info('Events ready, next scheduled at %s', self.next_scheduled)
                 time.sleep(settings.ENGINE_SCHEDULER_INTERVAL)
             print 'Engine process({0}) exit.'.format(os.getpid())
