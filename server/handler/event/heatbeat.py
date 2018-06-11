@@ -16,7 +16,7 @@ class HeatbeatEventHandler(BaseEventHandler):
 
         event.set_event_uuid(Random.get_uuid())
         event.set_event_name(EventType.HEARTBEAT)
-        event.set_event_timestamp(int(time.time()))
+        event.set_event_timestamp(time.time())
         event.set_source_host_id(settings.SERVER_UUID)
 
         # may be you want encrypt the data
