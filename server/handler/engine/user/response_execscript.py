@@ -1,12 +1,7 @@
 #! -*- coding: utf-8 -*-
 
 
-import time
-
-
-from server import settings
 from server.common.logger import Logger
-from server.models.event.pub_event import PubEvent
 from server.models.event.event_type import EventType
 from server.handler.engine.baseengine import BaseEngineHandler
 
@@ -39,7 +34,9 @@ class HeartbeatEngineHandler(BaseEngineHandler):
         response_code = self.get_response_code(event)
 
         # xm2cloud_agent::logging::key::f352c284-19f3-44ef-927e-8ad2eabdae94::f352c284-19f3-44ef-927e-8ad2eabdae94
-
+        # {
+        #     state: 1314
+        # }
         pipe = self.backend_handler.pool.pipeline()
         pipe.hmset(event_key, {'state': response_code})
         pipe.execute()
