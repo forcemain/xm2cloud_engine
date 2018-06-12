@@ -32,14 +32,16 @@ class HeartbeatEngineHandler(BaseEngineHandler):
 
     def put_event(self, event):
         event_key = self.get_event_key(event)
+        event_timestamp = event.get_event_timestamp()
         response_code = self.get_response_code(event)
 
         # xm2cloud_agent::logging::key::f352c284-19f3-44ef-927e-8ad2eabdae94::f352c284-19f3-44ef-927e-8ad2eabdae94
-        # {
-        #     state: 1314
-        # }
+        # [
+        #     1524625902.152811: 1311
+        #     1524625902.152811: 1314
+        # ]
         pipe = self.backend_handler.pool.pipeline()
-        pipe.hmset(event_key, {'state': response_code})
+        pipe.zadd(event_key, event_timestamp, response_code)
         pipe.execute()
 
     def handle(self, event):
