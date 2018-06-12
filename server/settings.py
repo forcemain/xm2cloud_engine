@@ -67,12 +67,8 @@ SERVER_UUID = 'fdb747d1-505d-475c-828c-7bcb919162c6'
 # Task settings
 LOGGING_TASK_KEY_PREFIX = 'xm2cloud_agent::logging::key'
 LOGGING_TASK_VAL_PREFIX = 'xm2cloud_agent::logging::val'
-CHECKING_TASK_KEY_PREFIX = 'xm2cloud_sched::checking::key'
-CHECKING_TASK_VAL_PREFIX = 'xm2cloud_sched::checking::val'
 MONITORING_TASK_KEY_PREFIX = 'xm2cloud_agent::monitoring::key'
 MONITORING_TASK_VAL_PREFIX = 'xm2cloud_agent::monitoring::val'
-AGENT_HEARTBEAT_TASK_KEY_PREFIX = 'xm2cloud_agent::heartbeat::key'
-ENGINE_HEARTBEAT_TASK_KEY_PREFIX = 'xm2cloud_engine::heartbeat::key'
 
 
 # Logging Settings

@@ -45,7 +45,7 @@ class HeartbeatEngineHandler(BaseEngineHandler):
         # xm2cloud_agent::heartbeat::key::f352c284-19f3-44ef-927e-8ad2eabdae94
         # xm2cloud_engine::heartbeat::key::f352c284-19f3-44ef-927e-8ad2eabdae94
         #
-        ekey = '{0}::{1}::{2}::{3}'.format(_name, EventType.HEARTBEAT, 'key', host_uuid)
+        ekey = '{0}::{1}::key::{2}'.format(_name, EventType.HEARTBEAT, host_uuid)
         pipe = self.backend_handler.pool.pipeline()
         pipe.hmset(ekey, {
             'timestamp': _timestamp,
