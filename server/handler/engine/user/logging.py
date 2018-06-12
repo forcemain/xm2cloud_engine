@@ -35,7 +35,7 @@ class LoggingEngineHandler(BaseEngineHandler):
     def get_event_key(self, event):
         sevent_uuid = event.get_event_id()
         host_uuid = event.get_source_host_id()
-        event_key = "xm2cloud_agent::logging::val::{0}::{1}".format(sevent_uuid, host_uuid)
+        event_key = "{0}::{1}::{2}".format(settings.LOGGING_TASK_VAL_PREFIX, sevent_uuid, host_uuid)
 
         return event_key
 

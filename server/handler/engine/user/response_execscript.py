@@ -1,6 +1,7 @@
 #! -*- coding: utf-8 -*-
 
 
+from server import settings
 from server.common.logger import Logger
 from server.models.event.event_type import EventType
 from server.handler.engine.baseengine import BaseEngineHandler
@@ -25,7 +26,7 @@ class HeartbeatEngineHandler(BaseEngineHandler):
     def get_event_key(self, event):
         sevent_uuid = event.get_event_id()
         host_uuid = event.get_source_host_id()
-        event_key = "xm2cloud_agent::logging::key::{0}::{1}".format(sevent_uuid, host_uuid)
+        event_key = "{0}::{1}::{2}".format(settings.LOGGING_TASK_KEY_PREFIX, sevent_uuid, host_uuid)
 
         return event_key
 

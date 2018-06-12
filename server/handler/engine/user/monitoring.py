@@ -55,13 +55,13 @@ class RedisDataEngineHandler(BaseDataEngineHandler):
 
         _name = metric.get_name()
         _tags = self.get_merge_tag(**metric.get_tags())
-        metric_key = 'xm2cloud_agent::monitoring::key::{0}.{1}{2}'.format(host_uuid, _name,  _tags)
+        metric_key = '{0}::{1}.{2}{3}'.format(settings.MONITORING_TASK_KEY_PREFIX, host_uuid, _name,  _tags)
 
         return metric_key
 
     def get_event_key(self, event):
         event_uuid = event.get_event_uuid()
-        event_key = "xm2cloud_agent::monitoring::val::{0}".format(event_uuid)
+        event_key = "{0}::{1}".format(settings.MONITORING_TASK_VAL_PREFIX, event_uuid)
 
         return event_key
 
