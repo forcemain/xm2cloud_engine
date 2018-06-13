@@ -82,9 +82,6 @@ class AMQPReceiver(object):
         self.add_on_channel_close_callback()
         self.setup_exchange(self._exchange)
 
-        # start consuming when channel open
-        self.start_consuming()
-
     def add_on_channel_close_callback(self):
         logger.info('Adding channel close callback')
         self._channel.add_on_close_callback(self.on_channel_closed)
@@ -98,7 +95,7 @@ class AMQPReceiver(object):
         logger.info('Declaring exchange %s', exchange_name)
         self._channel.exchange_declare(self.on_exchange_declareok,
                                        exchange_name,
-                                       self._exchange_type)
+                                       self._exchange_type, auto_delete=True)
 
     def on_exchange_declareok(self, unused_frame):
         logger.info('Exchange declared')
@@ -106,7 +103,7 @@ class AMQPReceiver(object):
 
     def setup_queue(self, queue_name):
         logger.info('Declaring queue %s', queue_name)
-        self._channel.queue_declare(self.on_queue_declareok, queue_name)
+        self._channel.queue_declare(self.on_queue_declareok, queue_name, auto_delete=True)
 
     def on_queue_declareok(self, method_frame):
         logger.info('Binding %s to %s with %s',
@@ -116,6 +113,7 @@ class AMQPReceiver(object):
 
     def on_bindok(self, unused_frame):
         logger.info('Queue bound')
+        # start consuming when bind ok
         self.start_consuming()
 
     def start_consuming(self):

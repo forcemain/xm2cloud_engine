@@ -3,6 +3,7 @@
 
 import pika
 import time
+import uuid
 
 
 from server import settings
@@ -29,8 +30,8 @@ class RabbitMQChannelSender(BaseChannelHelper, AMQPSender):
         self._auth_user = settings.CHANNEL_RABBITMQ_AUTH_USER
         self._auth_pass = settings.CHANNEL_RABBITMQ_AUTH_PASS
         self._exchange = settings.CHANNEL_RABBITMQ_DOWN_EXCHANGE
-        self._routing_key = settings.CHANNEL_RABBITMQ_ROUTING_KEY
-        self._exchange_type = settings.CHANNEL_RABBITMQ_EXCHANGE_TYPE
+        self._routing_key = settings.CHANNEL_RABBITMQ_DOWN_ROUTING_KEY
+        self._exchange_type = settings.CHANNEL_RABBITMQ_DOWN_EXCHANGE_TYPE
 
     def events_filter(self, events):
         events_data = []
@@ -102,8 +103,8 @@ class RabbitMQChannelReceiver(BaseChannelHelper, AMQPReceiver):
         self._auth_user = settings.CHANNEL_RABBITMQ_AUTH_USER
         self._auth_pass = settings.CHANNEL_RABBITMQ_AUTH_PASS
         self._exchange = settings.CHANNEL_RABBITMQ_UP_EXCHANGE
-        self._routing_key = settings.CHANNEL_RABBITMQ_ROUTING_KEY
-        self._exchange_type = settings.CHANNEL_RABBITMQ_EXCHANGE_TYPE
+        self._routing_key = settings.CHANNEL_RABBITMQ_UP_ROUTING_KEY
+        self._exchange_type = settings.CHANNEL_RABBITMQ_UP_EXCHANGE_TYPE
 
     def connect(self):
         conn_parameters = pika.ConnectionParameters(
