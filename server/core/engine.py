@@ -133,9 +133,9 @@ class Engine(Process):
                     fname, _ = event_data
                     self.put_ccache(fname)
                     t = EventThread(event_data, self)
+                    _event_threads.append(t)
                     t.setDaemon(True)
                     t.start()
-                    _event_threads.append(t)
                 logger.info('Events ready, next scheduled at %s', self.next_scheduled)
                 time.sleep(settings.ENGINE_SCHEDULER_INTERVAL)
             print 'Engine process({0}) exit.'.format(os.getpid())

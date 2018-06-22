@@ -38,7 +38,7 @@ class Channel(Process):
         try:
             self.channel_handler.msg_sender.stop()
             self.channel_handler.msg_receiver.stop()
-        finally:
+        except Exception:
             pass
 
     def thread_exp(self, name, func):
