@@ -70,24 +70,14 @@ class RabbitMQChannelSender(BaseChannelHelper, AMQPSender):
         if self._stopping:
             return
         # default batch 50, can be set larger
-        events_data = self.wcache_handler.read()
+        events_data = self.wcache_handler.read(batch=settings.CHANNEL_SENDER_EVENT_BATCH_SIZE)
         events_data_filtered = self.events_filter(events_data)
         for fname, fcontent in events_data_filtered:
             # may be usefull
             # fpath = os.path.join(self.wcache_handler.cache_path, fname)
             self._channel.basic_publish(self._exchange, self._routing_key, fcontent, properties={})
-            self._message_number += 1
-            self._cache_confirm.update({self._message_number: fname})
-            self._deliveries.append(self._message_number)
-            logger.info('Published message # %i', self._message_number)
+            self.wcache_handler.remove(fname)
         self.schedule_next_message()
-
-    def on_delivery_confirmation(self, method_frame):
-        confirmed = super(RabbitMQChannelSender, self).on_delivery_confirmation(method_frame)
-        if confirmed is False:
-            return
-        fname = self._cache_confirm.pop(method_frame.method.delivery_tag, '')
-        self.wcache_handler.remove(fname)
 
 
 class RabbitMQChannelReceiver(BaseChannelHelper, AMQPReceiver):
@@ -130,7 +120,6 @@ class RabbitMQChannelReceiver(BaseChannelHelper, AMQPReceiver):
                     basic_deliver.delivery_tag, properties.app_id, body)
         # put it to local cache
         self.rcache_handler.write(body)
-        self.acknowledge_message(basic_deliver.delivery_tag)
 
 
 class RabbitMQChannelHandler(BaseChannelHelper, BaseChannelHandler):

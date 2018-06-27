@@ -24,7 +24,7 @@ class AMQPReceiver(object):
         self._exchange_type = kwargs.get('exchange_type', None)
 
         # get a millisecond timestamp
-        self._disconnect_time = int(time.time())
+        self._disconnect_time = time.time()
         self._connection_status = AMQPStatus.DISCONNECTED
 
     @property
@@ -118,7 +118,7 @@ class AMQPReceiver(object):
         logger.info('Issuing consumer related RPC commands')
         self.add_on_cancel_callback()
         self._consumer_tag = self._channel.basic_consume(self.on_message,
-                                                         self._queue)
+                                                         self._queue, True)
 
     def add_on_cancel_callback(self):
         logger.info('Adding consumer cancellation callback')
@@ -132,10 +132,6 @@ class AMQPReceiver(object):
 
     def on_message(self, unused_channel, basic_deliver, properties, body):
         raise NotImplementedError
-
-    def acknowledge_message(self, delivery_tag):
-        logger.info('Acknowledging message %s', delivery_tag)
-        self._channel.basic_ack(delivery_tag)
 
     def stop_consuming(self):
         if self._channel:

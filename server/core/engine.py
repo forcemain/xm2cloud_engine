@@ -90,7 +90,7 @@ class Engine(Process):
 
     def event_get(self):
         # default batch is 50, can be set larger
-        events_data = self.channel_handler.rcache_handler.read(batch=128)
+        events_data = self.channel_handler.rcache_handler.read(batch=settings.ENGINE_EVENT_BATCH_SIZE)
 
         return events_data
 
