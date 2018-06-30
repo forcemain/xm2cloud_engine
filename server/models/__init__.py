@@ -3,6 +3,10 @@
 
 import os
 import json
+import time
+
+
+from server import settings
 
 
 class BaseModel(object):
@@ -17,6 +21,10 @@ class BaseModel(object):
 
     def is_valid(self):
         raise NotImplementedError
+
+    def is_expired(self, ttl=settings.EVENT_EXPIRED_TIME):
+        event_timestamp = self.event_timestamp or 0
+        return abs(time.time()-event_timestamp) > ttl
 
     @staticmethod
     def from_dict(data):

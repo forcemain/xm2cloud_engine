@@ -3,12 +3,12 @@
 
 import pika
 import time
-import uuid
 
 
 from server import settings
 from server.common.logger import Logger
 from server.common.amqp.sender import AMQPSender
+from server.models.event.pub_event import PubEvent
 from server.common.amqp.receiver import AMQPReceiver
 from server.handler.channel import BaseChannelHelper, BaseChannelHandler
 
@@ -33,20 +33,6 @@ class RabbitMQChannelSender(BaseChannelHelper, AMQPSender):
         self._routing_key = settings.CHANNEL_RABBITMQ_DOWN_ROUTING_KEY
         self._exchange_type = settings.CHANNEL_RABBITMQ_DOWN_EXCHANGE_TYPE
 
-    def events_filter(self, events):
-        events_data = []
-        # may be you want filter out event that half an hour ago
-        for event_data in events:
-            fname, fcontent = event_data
-            mtimedelta = time.time() - self.wcache_handler.mtime(fname)
-            if mtimedelta < settings.CHANNEL_SENDER_EVENT_EXPIRED_TIME:
-                events_data.append(event_data)
-                continue
-            logger.warning('Expired event file %s, deleted', fname)
-            self.wcache_handler.remove(fname)
-
-        return events_data
-
     def connect(self):
         conn_parameters = pika.ConnectionParameters(
             ssl=self._ssl,
@@ -66,14 +52,20 @@ class RabbitMQChannelSender(BaseChannelHelper, AMQPSender):
                                      self.on_connection_open,
                                      stop_ioloop_on_close=True)
 
+    def allow_send(self, fcontent):
+        event = PubEvent.from_json(fcontent)
+
+        return event.is_valid() and not event.is_expired()
+
     def publish_message(self):
         if self._stopping:
             return
         # default batch 50, can be set larger
         events_data = self.wcache_handler.read(batch=settings.CHANNEL_SENDER_EVENT_BATCH_SIZE)
-        events_data_filtered = self.events_filter(events_data)
-        for fname, fcontent in events_data_filtered:
-            # may be usefull
+        for fname, fcontent in events_data:
+            if not self.allow_send(fcontent):
+                logger.warning('Not allowed send this event data: {0}'.format(fcontent))
+                continue
             # fpath = os.path.join(self.wcache_handler.cache_path, fname)
             self._channel.basic_publish(self._exchange, self._routing_key, fcontent, properties={})
             self.wcache_handler.remove(fname)
@@ -115,9 +107,18 @@ class RabbitMQChannelReceiver(BaseChannelHelper, AMQPReceiver):
                                      self.on_connection_open,
                                      stop_ioloop_on_close=True)
 
+    def allow_receive(self, fcontent):
+        event = PubEvent.from_json(fcontent)
+        # Reserved agent data control interface
+
+        return True
+
     def on_message(self, unused_channel, basic_deliver, properties, body):
         logger.info('Received message # %s from %s: %s',
                     basic_deliver.delivery_tag, properties.app_id, body)
+        if not self.allow_receive(body):
+            logger.warning('Not allowed receive this event data: {0}'.format(body))
+            return
         # put it to local cache
         self.rcache_handler.write(body)
 
