@@ -2,7 +2,6 @@
 
 
 import pika
-import time
 
 
 from server import settings
@@ -26,12 +25,10 @@ class RabbitMQChannelSender(BaseChannelHelper, AMQPSender):
         self._host = settings.CHANNEL_RABBITMQ_HOST
         self._port = settings.CHANNEL_RABBITMQ_PORT
         self._vhost = settings.CHANNEL_RABBITMQ_VHOST
-        self._queue = settings.CHANNEL_RABBITMQ_DOWN_QUEUE
         self._auth_user = settings.CHANNEL_RABBITMQ_AUTH_USER
         self._auth_pass = settings.CHANNEL_RABBITMQ_AUTH_PASS
         self._exchange = settings.CHANNEL_RABBITMQ_DOWN_EXCHANGE
         self._routing_key = settings.CHANNEL_RABBITMQ_DOWN_ROUTING_KEY
-        self._exchange_type = settings.CHANNEL_RABBITMQ_DOWN_EXCHANGE_TYPE
 
     def connect(self):
         conn_parameters = pika.ConnectionParameters(

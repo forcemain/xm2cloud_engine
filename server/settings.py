@@ -57,13 +57,11 @@ CHANNEL_RABBITMQ_HOST = 'ops.xxoo.com'
 CHANNEL_RABBITMQ_VHOST = '/event_engine'
 CHANNEL_RABBITMQ_UP_EXCHANGE_TYPE = 'direct'
 CHANNEL_RABBITMQ_UP_QUEUE = 'event_up_queue'
-CHANNEL_RABBITMQ_DOWN_QUEUE = 'event_down_queue'
-CHANNEL_RABBITMQ_DOWN_EXCHANGE_TYPE = 'topic'
 CHANNEL_RABBITMQ_AUTH_USER = 'event_engine_user'
 CHANNEL_RABBITMQ_UP_EXCHANGE = 'event_up_exchange'
 CHANNEL_RABBITMQ_UP_ROUTING_KEY = 'up_routing_key'
-CHANNEL_RABBITMQ_DOWN_ROUTING_KEY = 'down_routing_key'
 CHANNEL_RABBITMQ_DOWN_EXCHANGE = 'event_down_exchange'
+CHANNEL_RABBITMQ_DOWN_ROUTING_KEY = 'down_routing_key'
 CHANNEL_RABBITMQ_AUTH_PASS = 'oZ38h0GoA0TehWcAPyIJqaponqo8Itv9'
 
 
@@ -79,5 +77,5 @@ MONITORING_TASK_VAL_PREFIX = 'xm2cloud_agent::monitoring::val'
 
 
 # Logging Settings
-DEFAULT_LOG_LEVEL = logging.DEBUG
+DEFAULT_LOG_LEVEL = logging.WARN
 DEFAULT_LOG_FORMAT = '%(asctime)s - %(name)s - %(pathname)s - %(lineno)d - %(levelname)s - %(message)s'
