@@ -53,7 +53,11 @@ class RabbitMQChannelSender(BaseChannelHelper, AMQPSender):
                                      stop_ioloop_on_close=True)
 
     def allow_send(self, fcontent):
-        event = PubEvent.from_json(fcontent)
+        try:
+            event = PubEvent.from_json(fcontent)
+        except Exception as e:
+            logger.warning('Invalid event: {0} with exception: {1}'.format(fcontent, e))
+            return False
 
         return event.is_valid() and not event.is_expired()
 
@@ -108,10 +112,13 @@ class RabbitMQChannelReceiver(BaseChannelHelper, AMQPReceiver):
                                      stop_ioloop_on_close=True)
 
     def allow_receive(self, fcontent):
-        event = PubEvent.from_json(fcontent)
-        # Reserved agent data control interface
+        try:
+            event = PubEvent.from_json(fcontent)
+        except Exception as e:
+            logger.warning('Invalid event: {0} with exception: {1}'.format(fcontent, e))
+            return False
 
-        return True
+        return event.is_valid()
 
     def on_message(self, unused_channel, basic_deliver, properties, body):
         logger.info('Received message # %s from %s: %s',
