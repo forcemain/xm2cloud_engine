@@ -1,38 +1,11 @@
 ### For Arch:
 #### xm2cloud_engine is a powerful and graceful engine component for xm2cloud devops framework.
 
-### For Metric (LifeCycle: 1h):
 
-```
-# Heartbeat(hmset):
-xm2cloud_agent::heartbeat::f352c284-19f3-44ef-927e-8ad2eabdae94
-{
-    name: ...,
-    version: ...,
-    timestamp: ...
-}
-xm2cloud_engine::heartbeat::0599f2ea-d113-4970-873d-f9ad154ae22c
-{
-    name: ...,
-    version: ...,
-    timestamp: ...,
-}
+### For Devops:
+> 基础核心架构
+![XM2CLOUD基础核心架构.png](https://raw.githubusercontent.com/xm2cloud/xm2cloud_engine/master/docs/screenshot/XM2CLOUD基础核心架构.png)
 
-# Timeseries(zadd):
-xm2cloud_engine::monitoring::key::f352c284-19f3-44ef-927e-8ad2eabdae94.net.if.out.bytes.persec/iface=en2 
-[
-    1524625902.152811 xm2cloud_engine::monitoring::val::55b71404-d994-401a-b4cc-857ce9b0e43b
-]
+> 持续集成&持续部署
+![XM2CLOUD持续集成&持续部署.png](https://raw.githubusercontent.com/xm2cloud/xm2cloud_engine/master/docs/screenshot/XM2CLOUD持续集成&持续部署.png)
 
-# Eventdata(hmset):
-xm2cloud_engine::monitoring::val::55b71404-d994-401a-b4cc-857ce9b0e43b
-{
-    value: ...
-}
-
-```
-
-### For Debug:
-
-```
-```
